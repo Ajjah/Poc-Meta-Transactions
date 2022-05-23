@@ -38,15 +38,7 @@ const MetaTransaction = () => {
     );
     const accounts = await provider.listAccounts();
 
-    if (accounts[0] == undefined) {
-      const web3Modal = new Web3Modal()
-      const connection = await web3Modal.connect()
-      provider = new ethers.providers.Web3Provider(connection)
-      accounts = await provider.listAccounts();
-      console.log(accounts[0])
 
-
-    }
     setAccount(accounts[0]);
     const newNonce = await forwarder.getNonce(accounts[0].toString()).then(nonce => nonce.toString());
     const token = new ethers.Contract(
