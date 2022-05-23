@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { ethers } from "ethers";
-import Web3Modal from 'web3modal'
+import Image from 'next/image'
 import axios from 'axios';
 import Token from "../artifacts/contracts/Token.sol/MyToken.json"
 import Receiver from "../artifacts/contracts/Receiver.sol/Receiver.json";
 import Forwarder from "../artifacts/contracts/Forwarder.sol/MyForwarder.json";
 import { receiverAddress, forwarderAddress, tokenAddress, autoTaskApi } from '../configuration';
+import Web3Modal from 'web3modal'
+
 
 
 const MetaTransaction = () => {
@@ -22,11 +24,8 @@ const MetaTransaction = () => {
 
 
   async function ConnectToWeb3() {
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection);
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const accounts = await provider.listAccounts();
     const receiver = new ethers.Contract(
       receiverAddress,
       Receiver.abi,
@@ -37,6 +36,17 @@ const MetaTransaction = () => {
       Forwarder.abi,
       signer
     );
+    const accounts = await provider.listAccounts();
+
+    if (accounts[0] == undefined) {
+      const web3Modal = new Web3Modal()
+      const connection = await web3Modal.connect()
+      provider = new ethers.providers.Web3Provider(connection)
+      accounts = await provider.listAccounts();
+      console.log(accounts[0])
+
+
+    }
     setAccount(accounts[0]);
     const newNonce = await forwarder.getNonce(accounts[0].toString()).then(nonce => nonce.toString());
     const token = new ethers.Contract(
@@ -61,9 +71,9 @@ const MetaTransaction = () => {
 
 
   const signer = () => {
-    console.log("signer")
+    console.log("sign")
     const EncodedData = receiver.interface.encodeFunctionData('TransferFrom', [account, recipient, Amount]);
-    setpayload(EncodedData);
+
 
 
     const EIP712Domain = [
@@ -89,7 +99,7 @@ const MetaTransaction = () => {
       verifyingContract: forwarderAddress,
     };
     const message = {
-      from: account, to: receiverAddress, value: 0, gas: 1000000, nonce: nonce, data: payload
+      from: account, to: receiverAddress, value: 0, gas: 1000000, nonce: nonce, data: EncodedData
     }
     setrequest(message)
 
@@ -102,7 +112,7 @@ const MetaTransaction = () => {
       primaryType: 'ForwardRequest',
       message: message
     });
-
+    console.log("before worning")
     web3.currentProvider.sendAsync(
       {
         method: "eth_signTypedData_v4",
@@ -119,6 +129,8 @@ const MetaTransaction = () => {
         setsignature(result.result)
 
       });
+    console.log("after worning")
+
   }
 
   async function approve() {
@@ -243,6 +255,8 @@ const MetaTransaction = () => {
         </div>
 
       </div>
+      <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+        onClick={signer}> Sign </button >
     </div >
   )
 }
