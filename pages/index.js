@@ -22,9 +22,11 @@ const MetaTransaction = () => {
 
   useEffect(() => {
     async function ConnectToWeb3() {
+      console.log("test")
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const accounts = await provider.listAccounts();
+      console.log(accounts[0])
       const receiver = new ethers.Contract(
         receiverAddress,
         Receiver.abi,
