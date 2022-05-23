@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ethers } from "ethers";
-import Image from 'next/image'
+import Web3Modal from 'web3modal'
 import axios from 'axios';
 import Token from "../artifacts/contracts/Token.sol/MyToken.json"
 import Receiver from "../artifacts/contracts/Receiver.sol/Receiver.json";
@@ -20,35 +20,35 @@ const MetaTransaction = () => {
   const [signature, setsignature] = useState();
 
 
-  useEffect(() => {
-    async function ConnectToWeb3() {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const accounts = provider.listAccounts();
-      console.log(accounts)
-      const receiver = new ethers.Contract(
-        receiverAddress,
-        Receiver.abi,
-        signer
-      );
-      const forwarder = new ethers.Contract(
-        forwarderAddress,
-        Forwarder.abi,
-        signer
-      );
-      setAccount(accounts[0]);
-      const newNonce = await forwarder.getNonce(accounts[0].toString()).then(nonce => nonce.toString());
-      const token = new ethers.Contract(
-        tokenAddress,
-        Token.abi,
-        signer
-      );
-      setnonce(newNonce);
-      setToken(token)
-      setReceiver(receiver);
-    }
-    ConnectToWeb3()
-  }, []);
+
+  async function ConnectToWeb3() {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const accounts = await provider.listAccounts();
+    const receiver = new ethers.Contract(
+      receiverAddress,
+      Receiver.abi,
+      signer
+    );
+    const forwarder = new ethers.Contract(
+      forwarderAddress,
+      Forwarder.abi,
+      signer
+    );
+    setAccount(accounts[0]);
+    const newNonce = await forwarder.getNonce(accounts[0].toString()).then(nonce => nonce.toString());
+    const token = new ethers.Contract(
+      tokenAddress,
+      Token.abi,
+      signer
+    );
+    setnonce(newNonce);
+    setToken(token)
+    setReceiver(receiver);
+  }
+
 
 
   async function sendToDefender() {
@@ -212,6 +212,8 @@ const MetaTransaction = () => {
                   onClick={sendToDefender}> Send Transaction </button >
                 <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
                   onClick={approve}> Approve </button >
+                <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  onClick={ConnectToWeb3}> ConnectToWeb3 </button >
               </div>
             </div>
           </div>
