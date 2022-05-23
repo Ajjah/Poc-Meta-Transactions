@@ -15,7 +15,9 @@ const MetaTransaction = () => {
   const [token, setToken] = useState();
   const [account, setAccount] = useState();
   const [Amount, setAmount] = useState();
-  const [payload, setpayload] = useState();
+  const [connected, setconnected] = useState(false);
+  const [sent, setsent] = useState(false);
+
   const [nonce, setnonce] = useState();
   const [recipient, setRecipient] = useState();
   const [request, setrequest] = useState();
@@ -49,6 +51,7 @@ const MetaTransaction = () => {
     setnonce(newNonce);
     setToken(token)
     setReceiver(receiver);
+    setconnected(true);
   }
 
 
@@ -58,6 +61,8 @@ const MetaTransaction = () => {
 
     const body = { request: request, signature: signature };
     const meta = await axios.post(autoTaskApi, body)
+    setsent(true);
+
 
   }
 
@@ -121,8 +126,6 @@ const MetaTransaction = () => {
         setsignature(result.result)
 
       });
-    console.log("after worning")
-
   }
 
   async function approve() {
@@ -176,7 +179,7 @@ const MetaTransaction = () => {
                 With Zero Fees
               </span>
             </h1>
-            <p className="leading-normal text-base md:text-2xl mb-8 text-center md:text-left">
+            <p className=" text-green-200 leading-normal text-base md:text-2xl mb-8 text-center md:text-left">
               we take charge of  paying your transaction
             </p>
 
@@ -212,12 +215,16 @@ const MetaTransaction = () => {
               <div className="flex items-center justify-between pt-4">
                 <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
                   onClick={signer}> Sign </button >
-                <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
-                  onClick={sendToDefender}> Send Transaction </button >
+                {!sent ? <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  onClick={sendToDefender}> Send Transaction </button > : <div className="bg-red-600 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  > Transaction Sent </div >}
                 <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
                   onClick={approve}> Approve </button >
-                <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
-                  onClick={ConnectToWeb3}> ConnectToWeb3 </button >
+                {!connected ?
+                  <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                    onClick={ConnectToWeb3}> ConnectToWeb3 </button > :
+                  <div className="bg-green-700 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  > connected </div >}
               </div>
             </div>
           </div>
@@ -247,8 +254,7 @@ const MetaTransaction = () => {
         </div>
 
       </div>
-      <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
-        onClick={signer}> Sign </button >
+
     </div >
   )
 }
