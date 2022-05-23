@@ -24,7 +24,9 @@ const MetaTransaction = () => {
     async function ConnectToWeb3() {
       console.log("test")
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      console.log(provider)
+      const signer = await provider.getSigner();
+      console.log(signer)
       const accounts = await provider.listAccounts();
       console.log(accounts[0])
       const receiver = new ethers.Contract(
