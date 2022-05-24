@@ -62,6 +62,13 @@ const MetaTransaction = () => {
     const body = { request: request, signature: signature };
     const meta = await axios.post(autoTaskApi, body)
     setsent(true);
+    if (window.confirm('click "ok" to see your tansaction on etherscan')) {
+      window.open(
+        'https://rinkeby.etherscan.io/address/0x973dd251a3a0f89fa283b8f78593f84e8090222b',
+        '_blank' // <- This is what makes it open in a new window.
+      );
+    };
+
 
 
   }
