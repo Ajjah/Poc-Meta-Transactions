@@ -17,6 +17,8 @@ const MetaTransaction = () => {
   const [account, setAccount] = useState();
   const [Amount, setAmount] = useState();
   const [connected, setconnected] = useState(false);
+  const [approved, setapproved] = useState(false);
+  const [signed, setsigned] = useState(false);
   const [sent, setsent] = useState(false);
   const [recipient, setRecipient] = useState();
   const [request, setrequest] = useState();
@@ -52,31 +54,23 @@ const MetaTransaction = () => {
     setconnected(true);
   }
 
-
-
   async function sendToDefender() {
-    console.log("sendtoDefender")
-
+    console.log("sendtoDefender");
     const body = { request: request, signature: signature };
     const meta = await axios.post(autoTaskApi, body)
     setsent(true);
+    setsigned(false);
     if (window.confirm('click "ok" to see your tansaction on etherscan')) {
       window.open(
         'https://rinkeby.etherscan.io/address/0x973dd251a3a0f89fa283b8f78593f84e8090222b',
         '_blank' // <- This is what makes it open in a new window.
       );
     };
-
-
-
   }
-
 
   async function signer() {
     console.log("sign");
     const newNonce = await forwarder.getNonce(account.toString()).then(nonce => nonce.toString());
-
-
     const EncodedData = receiver.interface.encodeFunctionData('TransferFrom', [account, recipient, Amount]);
 
 
@@ -133,6 +127,7 @@ const MetaTransaction = () => {
         }
         setsignature(result.result)
         setsent(false);
+        setsigned(true);
 
 
       });
@@ -142,6 +137,7 @@ const MetaTransaction = () => {
     console.log("approve")
 
     await token.approve(receiverAddress, token.balanceOf(account));
+    setapproved(true)
 
   }
 
@@ -228,10 +224,12 @@ const MetaTransaction = () => {
                     onClick={ConnectToWeb3}> ConnectToWeb3 </button > :
                   <div className="bg-green-700 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
                   > connected </div >}
-                <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
-                  onClick={approve}> Approve </button >
-                <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
-                  onClick={signer}> Sign </button >
+                {!approved ? <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  onClick={approve}> Approve </button > : <div className="bg-blue-600 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  > Approved </div >}
+                {!signed ? <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  onClick={signer}> Sign </button > : <div className="bg-blue-600 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                  > message signed </div >}
                 {!sent ? <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
                   onClick={sendToDefender}> Send Transaction </button > : <div className="bg-red-600 text-white font-bold py-2 px-4 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
                   > Transaction Sent </div >}
