@@ -13,12 +13,11 @@ import Web3Modal from 'web3modal'
 const MetaTransaction = () => {
   const [receiver, setReceiver] = useState();
   const [token, setToken] = useState();
+  const [forwarder, setForwarder] = useState();
   const [account, setAccount] = useState();
   const [Amount, setAmount] = useState();
   const [connected, setconnected] = useState(false);
   const [sent, setsent] = useState(false);
-
-  const [nonce, setnonce] = useState();
   const [recipient, setRecipient] = useState();
   const [request, setrequest] = useState();
   const [signature, setsignature] = useState();
@@ -42,14 +41,13 @@ const MetaTransaction = () => {
     );
     const accounts = await provider.listAccounts();
     setAccount(accounts[0]);
-    const newNonce = await forwarder.getNonce(accounts[0].toString()).then(nonce => nonce.toString());
     const token = new ethers.Contract(
       tokenAddress,
       Token.abi,
       signer
     );
-    setnonce(newNonce);
     setToken(token)
+    setForwarder(forwarder)
     setReceiver(receiver);
     setconnected(true);
   }
@@ -74,8 +72,11 @@ const MetaTransaction = () => {
   }
 
 
-  const signer = () => {
-    console.log("sign")
+  async function signer() {
+    console.log("sign");
+    const newNonce = await forwarder.getNonce(account.toString()).then(nonce => nonce.toString());
+
+
     const EncodedData = receiver.interface.encodeFunctionData('TransferFrom', [account, recipient, Amount]);
 
 
@@ -103,7 +104,7 @@ const MetaTransaction = () => {
       verifyingContract: forwarderAddress,
     };
     const message = {
-      from: account, to: receiverAddress, value: 0, gas: 1000000, nonce: nonce, data: EncodedData
+      from: account, to: receiverAddress, value: 0, gas: 1000000, nonce: newNonce, data: EncodedData
     }
     setrequest(message)
 
@@ -131,6 +132,8 @@ const MetaTransaction = () => {
           return console.error(result.error.message)
         }
         setsignature(result.result)
+        setsent(false);
+
 
       });
   }
