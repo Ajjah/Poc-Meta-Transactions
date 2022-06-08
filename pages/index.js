@@ -112,7 +112,7 @@ const MetaTransaction = () => {
       message: message
     });
     console.log("before worning")
-    web3.currentProvider.sendAsync(
+    ethereum.request(
       {
         method: "eth_signTypedData_v4",
         params: [account, data],
